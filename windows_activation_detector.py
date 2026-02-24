@@ -48,7 +48,6 @@ def _auto_install():
                 input("\n  Press Enter to exit...")
                 sys.exit(1)
         print("  Setup complete! Starting tool...\n")
-        # Restart so fresh imports load correctly
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
 _auto_install()
@@ -428,8 +427,10 @@ def main():
 
     # --- User Input ---
     section("SCAN INFO")
-    organization = input(Fore.WHITE + "  Enter Organization Name       : ").strip() or "Not Specified"
-    auditor      = input(Fore.WHITE + "  Enter Your Name (Auditor)     : ").strip() or "Not Specified"
+    print(Fore.WHITE + "  Enter Organization Name       : ", end="", flush=True)
+    organization = input().strip() or "Not Specified"
+    print(Fore.WHITE + "  Enter Your Name (Auditor)     : ", end="", flush=True)
+    auditor = input().strip() or "Not Specified"
     print()
     print(Fore.CYAN + f"  Organization : {organization}")
     print(Fore.CYAN + f"  Auditor      : {auditor}")
@@ -517,7 +518,8 @@ def main():
     )
 
     print()
-    input(Fore.CYAN + "  Press Enter to exit...")
+    print(Fore.CYAN + "  Press Enter to exit...", end="", flush=True)
+    input()
 
 
 if __name__ == "__main__":
