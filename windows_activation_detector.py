@@ -4,59 +4,21 @@ Windows Activation & Edition Detector
 Detects Windows edition, activation status, KMS configuration,
 crack tool artifacts and sends results to a Discord webhook.
 
+Requirements:
+    pip install requests wmi colorama
+
 Build to .exe:
     pip install pyinstaller
-    pyinstaller --onefile --noconsole windows_activation_detector.py
+    pyinstaller --onefile --noconsole --icon=icon.ico windows_activation_detector.py
 """
 
 import sys
 import os
 import subprocess
-
-# ──────────────────────────────────────────────
-# AUTO INSTALLER - Runs before anything else
-# Silently installs missing packages on first run
-# ──────────────────────────────────────────────
-
-_REQUIRED = {
-    "requests": "requests",
-    "wmi":      "wmi",
-    "colorama": "colorama",
-}
-
-def _auto_install():
-    missing = []
-    for import_name, pip_name in _REQUIRED.items():
-        try:
-            __import__(import_name)
-        except ImportError:
-            missing.append(pip_name)
-
-    if missing:
-        print(f"\n  First-time setup: installing required components ({', '.join(missing)})...")
-        print("  This only happens once, please wait...\n")
-        for pkg in missing:
-            try:
-                subprocess.check_call(
-                    [sys.executable, "-m", "pip", "install", pkg, "--quiet"],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
-            except Exception as e:
-                print(f"  [ERROR] Could not install {pkg}: {e}")
-                print("  Please run: pip install requests wmi colorama")
-                input("\n  Press Enter to exit...")
-                sys.exit(1)
-        print("  Setup complete! Starting tool...\n")
-        os.execv(sys.executable, [sys.executable] + sys.argv)
-
-_auto_install()
-
-# ──────────────────────────────────────────────
-# SAFE IMPORTS (packages guaranteed installed)
-# ──────────────────────────────────────────────
-
+import warnings
+warnings.filterwarnings("ignore")
 import datetime
+import socket
 import importlib
 import base64
 import colorama
@@ -374,7 +336,7 @@ def send_discord(
     embed = {
         "title":     "Windows Activation Report",
         "color":     discord_color,
-        "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "fields": [
             {"name": "Organization",   "value": organization,              "inline": True},
             {"name": "Auditor",        "value": auditor,                   "inline": True},
@@ -427,10 +389,8 @@ def main():
 
     # --- User Input ---
     section("SCAN INFO")
-    print(Fore.WHITE + "  Enter Organization Name       : ", end="", flush=True)
-    organization = input().strip() or "Not Specified"
-    print(Fore.WHITE + "  Enter Your Name (Auditor)     : ", end="", flush=True)
-    auditor = input().strip() or "Not Specified"
+    organization = input(Fore.WHITE + "  Enter Organization Name       : ").strip() or "Not Specified"
+    auditor      = input(Fore.WHITE + "  Enter Your Name (Auditor)     : ").strip() or "Not Specified"
     print()
     print(Fore.CYAN + f"  Organization : {organization}")
     print(Fore.CYAN + f"  Auditor      : {auditor}")
@@ -518,8 +478,7 @@ def main():
     )
 
     print()
-    print(Fore.CYAN + "  Press Enter to exit...", end="", flush=True)
-    input()
+    input(Fore.CYAN + "  Press Enter to exit...")
 
 
 if __name__ == "__main__":
